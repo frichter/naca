@@ -1,4 +1,14 @@
-install.packages("limma")
+# package installation commands
+
+install.packages("ggplot2")
+source("https://bioconductor.org/biocLite.R")
+biocLite("limma")
+
+source("http://bioconductor.org/biocLite.R")
+biocLite(c("AnnotationDbi", "impute", "GO.db", "preprocessCore"))
+install.packages("WGCNA") 
+
+install.packages("reshape")
 
 # failed statistics for downstream genes
 

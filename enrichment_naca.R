@@ -1,33 +1,21 @@
 
 
 ############################
-# obtain subset sample names
+
 ############################
 library("WGCNA")
 library("limma")
 options(stringsAsFactors=FALSE)
-setwd("~/Documents/phd/variancepartitionpcgc")
+setwd("/media/Storage/PhD/naca")
+source("analysis_functions.R")
 
-vobj = readRDS("matrix.exon.RDS")
-info = readRDS("info.exon.RDS")
-info$L2 <- as.character(info$L2)
-info[info$L2 %in% c("Fallot"), ]$L2 = "TOF"
-info$L2 <- droplevels(factor(info$L2))
-fit = lmFit(vobj, model.matrix(~ as.factor(Batch), info))
-R = residuals(fit, vobj)
-datExpr.exon = as.matrix(t(R))
-colnames(datExpr.exon) = rownames(R)
-rownames(datExpr.exon) = colnames(R)
-exon.list = grep("NACA\\>", colnames(datExpr.exon))
-data = as.data.frame(datExpr.exon[, exon.list])
-data$sample = rownames(data)
-info$sample = rownames(info)
-info$ID = as.character(info$ID)
-data.all = merge(info, data)
-samples.low.naca = unique(data.all[data.all$NACA.6 < -4, "sample"])
-sample.file = "analysisExon/DE_Exon_NACA/naca/samples_low_naca.txt"
+# obtain subset sample names (and save to file)
+samples.low.naca = ObtainLowNacaSampleNames(sample.file)
+
+sample.file = "id_info/samples_low_naca.txt"
 write.table(samples.low.naca, file = sample.file, sep = ", ", quote = FALSE, 
             row.names = FALSE, col.names = FALSE)
+
 
 #########
 # Gene DE
@@ -38,27 +26,30 @@ write.table(samples.low.naca, file = sample.file, sep = ", ", quote = FALSE,
 # also this other: 1-05824
 # run DE between naca.all vs all and naca.hlhs vs all
 
-setwd("~/Documents/phd/variancepartitionpcgc")
 options(stringsAsFactors=FALSE)
 vobj <- readRDS("matrix.gene.RDS")
 info <- readRDS("info.gene.RDS")
 
 naca.col = rep(0, nrow(info))
-naca.col[rownames(info) %in% samples.low.naca[1:5]] = 1
+naca.col[rownames(info) %in% samples.low.naca, ] = 1
 info$naca = naca.col
+
+naca.hlhs.col = rep(0, nrow(info))
+naca.hlhs.col[rownames(info) %in% samples.low.naca, ] = 1
+info$naca.hlhs = naca.hlhs.col
 
 # shorten Chr 
 vobj$genes$ChrShort <- sapply(strsplit(vobj$genes$Chr, ";"), function(x) x[1])
 
 # fit linear model
-design <- model.matrix( ~ Batch + naca, data = info)
+design <- model.matrix( ~ Batch + naca.hlhs, data = info)
 colnames(design)
 
 # fit limmar linear model
 fit <- lmFit(vobj, design)
 fit <- eBayes(fit)
 summary(decideTests(fit))
-topSet <- topTable(fit, coef = "naca", p.value = 0.05, 
+topSet <- topTable(fit, coef = "naca.hlhs", p.value = 0.05, 
                    number = 17000)
 # filters by adj.P.Val
 topSet[nrow(topSet),]
@@ -99,17 +90,18 @@ normalGenes = c("SHOX2", "MYH4")
 #######################
 # Plot downstream genes
 #######################
-setwd("~/Documents/phd/variancepartitionpcgc")
-options(stringsAsFactors=FALSE)
-vobj <- readRDS("matrix.gene.RDS")
-info <- readRDS("info.gene.RDS")
 
-sample.file = "analysisExon/DE_Exon_NACA/naca/samples_low_naca.txt"
-samples.low = read.table(file = sample.file)
+setwd("/media/Storage/PhD/naca")
+options(stringsAsFactors=FALSE)
+vobj <- readRDS("expression_data/matrix.gene.RDS")
+info <- readRDS("expression_data/info.gene.RDS")
+
+sample.file = "id_info/samples_low_naca.txt"
+samples.low = read.table(file = sample.file)$V1
 
 # [1:5]
 naca.col = rep(0, nrow(info))
-naca.col[rownames(info) %in% samples.low$V1] = 1
+naca.col[rownames(info) %in% samples.low] = 1
 info$naca = naca.col
 
 fit = lmFit(vobj, model.matrix(~ as.factor(Batch), info))
@@ -119,22 +111,21 @@ colnames(datExpr) = rownames(R)
 rownames(datExpr) = colnames(R)
 
 downGenes = c("IRX3", "\\<MB\\>", "POSTN", "CXCL12", "KCNE1\\>", "MYH7\\>", "MYH2", "NACA\\>")
-upGenes = c("KRT8\\>", "SHOX2", "MYH4")
-normalGenes = c("SHOX2", "MYH4")
-
-down.indices = grep(paste(c(downGenes, upGenes, normalGenes), collapse = "|"), colnames(datExpr))
+# upGenes = c("KRT8\\>", "SHOX2", "MYH4")
+# normalGenes = c("SHOX2", "MYH4")
+# c(downGenes, upGenes, normalGenes)
+down.indices = grep(paste(downGenes, collapse = "|"), colnames(datExpr))
 data = as.data.frame(datExpr[, down.indices])
 data$sample = rownames(data)
 info$sample = rownames(info)
 info$ID = as.character(info$ID)
-data.all = merge(info, data)
 
 library(reshape)
 data.long = melt(data)
 data.long.all = merge(data.long, info)
 # plot
-library(ggplot2)
 
+library(ggplot2)
 #data.long.all[data.long.all$sample %in% samples.low$V1, ]
 ggplot(data.long.all, aes(x = variable, y = value, col = as.factor(naca))) + 
   geom_point()

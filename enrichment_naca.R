@@ -6,6 +6,7 @@
 library("WGCNA")
 library("limma")
 options(stringsAsFactors=FALSE)
+<<<<<<< HEAD
 setwd("/media/Storage/PhD/naca")
 source("analysis_functions.R")
 
@@ -15,6 +16,15 @@ samples.low.naca = ObtainLowNacaSampleNames(sample.file)
 sample.file = "id_info/samples_low_naca.txt"
 write.table(samples.low.naca, file = sample.file, sep = ", ", quote = FALSE, 
             row.names = FALSE, col.names = FALSE)
+setwd("naca/")
+#setwd("/media/Storage/PhD/naca")
+source("analysis_functions.R")
+
+# obtain subset sample names (and save to file)
+# samples.low.naca = ObtainLowNacaSampleNames()
+# sample.file = "id_info/samples_low_naca.txt"
+# write.table(samples.low.naca, file = sample.file, sep = ",", quote = FALSE, 
+#             row.names = FALSE, col.names = FALSE)
 
 
 #########
@@ -27,6 +37,9 @@ write.table(samples.low.naca, file = sample.file, sep = ", ", quote = FALSE,
 # run DE between naca.all vs all and naca.hlhs vs all
 
 options(stringsAsFactors=FALSE)
+samples.low.naca = read.table(file = "id_info/samples_low_naca.txt")$V1
+
+>>>>>>> c4a81a66080eca2e76d5e9d4e3ab303fc93a4d5e
 vobj <- readRDS("matrix.gene.RDS")
 info <- readRDS("info.gene.RDS")
 
@@ -92,6 +105,11 @@ normalGenes = c("SHOX2", "MYH4")
 #######################
 
 setwd("/media/Storage/PhD/naca")
+library("limma")
+
+# setwd("/media/Storage/PhD/naca")
+setwd("D:/PhD/naca")
+>>>>>>> c4a81a66080eca2e76d5e9d4e3ab303fc93a4d5e
 options(stringsAsFactors=FALSE)
 vobj <- readRDS("expression_data/matrix.gene.RDS")
 info <- readRDS("expression_data/info.gene.RDS")
@@ -127,6 +145,7 @@ data.long.all = merge(data.long, info)
 
 library(ggplot2)
 #data.long.all[data.long.all$sample %in% samples.low$V1, ]
+<<<<<<< HEAD
 ggplot(data.long.all, aes(x = variable, y = value, col = as.factor(naca))) + 
   geom_point()
 
@@ -142,4 +161,20 @@ ggplot(data.long.all, aes(x = variable, y = value, col = as.factor(naca))) +
   theme(legend.title = element_blank()) 
 
 
+
+plot.down = ggplot(data=subset(data.long.all, naca == 0), aes(x = variable, y = value)) + 
+  geom_point(color = "red") +
+  geom_point(data=subset(data.long.all, naca == 1), aes(x = variable, y = value), color = "blue") +
+  xlab ("NACA downstream target") +
+  ylab("Expression (normalized)") + 
+  theme_bw() +
+  theme(legend.title = element_blank())
+f = "figures/expr.downstream_targets.png"
+ggsave(filename = f, plot = plot.down, width = 5, height = 5, dpi = 300)
+
+# provide boxplot + error bars
+# plot all genes not just down, as well as just down
+
+
+  
 

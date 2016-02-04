@@ -1,4 +1,5 @@
-ObtainLowNacaSampleNames = function(sample.file) {
+ObtainLowNacaSampleNames = function() {
+>>>>>>> c4a81a66080eca2e76d5e9d4e3ab303fc93a4d5e
   # Return sample IDs with missing exon 6 in NACA
   
   vobj = readRDS("expression_data/matrix.exon.RDS")

@@ -1,0 +1,13 @@
+﻿23 genes were differentially expressed in all skNAC−/− hearts, 17 of which are currently annotated genes. 
+Decreased, gone: skNAC, Irx4 (IRXA3), Myoglobin (MB, PVALB), Periostin (POSTN, PN, OSF-2), Cxcl12 (Sdf-1), kcne1 (JLNS2, LQT5, JLNS, LQT2/5, MINK, ISK), Myh7 (MYHCB), Myh2 (MYH2A)
+up:
+Krt2.8, Shox2, Myh4
+Normal: Smyd1, Hand2
+
+
+
+1) look at coexpression module: both L3LVOTO and HLHS_subtype. pink + 176 genes in both
+
+2) look at DE gene up/down: MB and MYH2 down with p < 0.05, 13% probability of occurring by chance
+
+3) look at absolute expression values
